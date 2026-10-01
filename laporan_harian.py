@@ -5,6 +5,7 @@ from dotenv import load_dotenv
 from google import genai
 import os
 import time
+import json
 def main():
     try:
         #request api
@@ -26,7 +27,9 @@ def main():
             f.write(f"{datetime.now()}\n")
             f.write(f"USD to IDR: [{idr_usd}]\n")
             load_dotenv()
-            insight =  "AI insight tidak tersedia saat ini"
+            data =  {"sentiment":"-",
+                        "insight":"AI insight tidak tersedia saat ini",
+                        "saran_aksi":"-"}
             api_key = os.getenv("GEMINI_API_KEY")
             for percobaan in range(3):
                 try :
@@ -34,14 +37,21 @@ def main():
                     client = genai.Client(api_key=api_key)
                     response = client.models.generate_content(
                         model="gemini-3.5-flash",
-                        contents=f"Kurs USD ke IDR saat ini adalah Rp{idr_usd}.Berikan 1 kalimat insight sederhana tentang kondisi kurs tersebut dan apa artinya bagi orang yang ingin menukar uang."
+                        contents=f"""
+                        Kurs USD ke IDR saat ini adalah Rp{idr_usd}.Berikan 1 kalimat insight sederhana tentang kondisi kurs tersebut dan apa artinya bagi orang yang ingin menukar uang.
+                        Jawab HANYA dengan JSON, tanpa teks lain, dengan format:
+                        {{ "sentiment" :" salah satu dari (positif/negatif/netral)", "insight":"1 kalimat sederhana tentang kondisi kurs", "saran_aksi":  "1 kalimat saran buat orang yang mau tuker uang"}}
+                        """
                     )
-                    insight = response.text
+                    data = json.loads(response.text)
+                    print(data["sentiment"])
                     break
                 except Exception as e:
                     time.sleep(5)
                     print(f"Percobaan gagal: {e}")
-            f.write(f"{insight}\n")
+            f.write(f"{data["sentiment"]}\n")
+            f.write(f"{data["insight"]}\n")
+            f.write(f"{data["saran_aksi"]}\n")
             for nama_kota, jumlah in kota.items():
                 f.write(f"{nama_kota} : {jumlah}\n")
             f.write(f"---\n")
