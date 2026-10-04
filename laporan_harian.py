@@ -6,6 +6,21 @@ from google import genai
 import os
 import time
 import json
+
+def kirim_telegram(pesan):
+    token = os.getenv("TELEGRAM_BOT_TOKEN")
+    chat_id = os.getenv("TELEGRAM_CHAT_ID")
+    url = f"https://api.telegram.org/bot{token}/sendMessage"
+    data = {"chat_id":chat_id,
+            "text":pesan}
+
+    
+    try:
+        response = requests.post(url,data=data,timeout=10)
+        print(response.status_code)
+    except Exception: 
+        print("gagal kirim telegram")
+
 def main():
     try:
         #request api
@@ -55,7 +70,10 @@ def main():
             for nama_kota, jumlah in kota.items():
                 f.write(f"{nama_kota} : {jumlah}\n")
             f.write(f"---\n")
-                
+            
+        kirim_telegram(f"USD to IDR: [{idr_usd}]\nSentiment : {data["sentiment"]}\nInsight : {data["insight"]}\nSaran Aksi : {data["saran_aksi"]}")    
+ 
+        
     except Exception as e:
         print("Error: ",e)
     
