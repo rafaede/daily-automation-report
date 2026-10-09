@@ -6,6 +6,7 @@ from google import genai
 import os
 import time
 import json
+import pandas as pd
 
 def kirim_telegram(pesan):
     token = os.getenv("TELEGRAM_BOT_TOKEN")
@@ -27,16 +28,8 @@ def main():
         response = requests.get("https://api.exchangerate-api.com/v4/latest/USD")
         idr_usd = response.json()['rates']['IDR']
         
-        #buka csv
-        kota = {}
-        with open('data.csv', 'r') as f:
-            reader = csv.reader(f)
-            next(reader)
-            for line in reader:
-                if line[2] in kota:
-                    kota[line[2]] += 1
-                else:
-                    kota[line[2]] = 1
+        df = pd.read_csv("data.csv")
+        kota = df['kota'].value_counts()
             
         with open('laporan.txt', 'a') as f:
             f.write(f"{datetime.now()}\n")
