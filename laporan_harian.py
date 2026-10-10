@@ -30,6 +30,7 @@ def main():
         
         df = pd.read_csv("data.csv")
         kota = df['kota'].value_counts()
+        umur_kota = df.groupby('kota')['umur'].mean()
             
         with open('laporan.txt', 'a') as f:
             f.write(f"{datetime.now()}\n")
@@ -47,8 +48,9 @@ def main():
                         model="gemini-3.5-flash",
                         contents=f"""
                         Kurs USD ke IDR saat ini adalah Rp{idr_usd}.Berikan 1 kalimat insight sederhana tentang kondisi kurs tersebut dan apa artinya bagi orang yang ingin menukar uang.
+                        Data rata-rata umur per kota: {umur_kota.to_string()}.
                         Jawab HANYA dengan JSON, tanpa teks lain, dengan format:
-                        {{ "sentiment" :" salah satu dari (positif/negatif/netral)", "insight":"1 kalimat sederhana tentang kondisi kurs", "saran_aksi":  "1 kalimat saran buat orang yang mau tuker uang"}}
+                        {{ "sentiment" :" salah satu dari (positif/negatif/netral)", "insight":"1 kalimat tentang kondisi kurs, ditambah 1 kalimat fakta menarik dari data rata-rata umur per kota", "saran_aksi":  "1 kalimat saran buat orang yang mau tuker uang"}}
                         """
                     )
                     data = json.loads(response.text)
