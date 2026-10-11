@@ -7,6 +7,7 @@ import os
 import time
 import json
 import pandas as pd
+import sqlite3
 
 def kirim_telegram(pesan):
     token = os.getenv("TELEGRAM_BOT_TOKEN")
@@ -21,6 +22,16 @@ def kirim_telegram(pesan):
         print(response.status_code)
     except Exception: 
         print("gagal kirim telegram")
+
+def simpan_database(tanggal, kurs, sentiment):
+    conn = sqlite3.connect("laporan.db")
+    cursor = conn.cursor()
+    cursor.execute("CREATE TABLE IF NOT EXISTS laporan (tanggal TEXT, kurs REAL, sentiment TEXT)")
+    cursor.execute("INSERT INTO laporan VALUES(?, ?, ?)", (tanggal, kurs, sentiment))
+    cursor.execute("SELECT * FROM laporan")
+    print(cursor.fetchall())
+    conn.commit()
+    conn.close()
 
 def main():
     try:
@@ -65,6 +76,8 @@ def main():
             for nama_kota, jumlah in kota.items():
                 f.write(f"{nama_kota} : {jumlah}\n")
             f.write(f"---\n")
+        
+        simpan_database( datetime.now().strftime("%Y-%m-%d"),idr_usd ,data["sentiment"])
             
         kirim_telegram(f"USD to IDR: [{idr_usd}]\nSentiment : {data["sentiment"]}\nInsight : {data["insight"]}\nSaran Aksi : {data["saran_aksi"]}")    
  
