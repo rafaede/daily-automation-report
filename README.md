@@ -21,3 +21,8 @@ Hasil ke-append ke `laporan.txt`: ada timestamp, kurs, sentiment, insight, saran
 
 ## Telegram Notification
 Setelah laporan tersimpan, script ngirim satu pesan ke Telegram berisi kurs, sentiment, insight, dan saran aksi. Token bot didapat dari @BotFather. Kalau pengiriman gagal, script cuma nampilin pesan error singkat dan tidak menampilkan token.
+
+## Database
+- menyimpan tanggal, kurs, sentiment di database SQLite
+- nama database laporan.db
+- database dibuat otomatis saat script dijalankan, jadi tidak memerlukan laporan.db saya
