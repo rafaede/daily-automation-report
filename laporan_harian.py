@@ -33,6 +33,17 @@ def simpan_database(tanggal, kurs, sentiment):
     conn.commit()
     conn.close()
 
+def ambil_kurs_terakhir():
+    conn = sqlite3.connect("laporan.db")
+    cursor = conn.cursor()
+    cursor.execute("CREATE TABLE IF NOT EXISTS laporan (tanggal TEXT, kurs REAL, sentiment TEXT)")
+    cursor.execute("SELECT kurs FROM laporan ORDER BY rowid DESC LIMIT 1")
+    kurs = cursor.fetchone()
+    conn.close()
+    if kurs is None:
+        return
+    return kurs[0]
+
 def main():
     try:
         #request api
@@ -42,7 +53,13 @@ def main():
         df = pd.read_csv("data.csv")
         kota = df['kota'].value_counts()
         umur_kota = df.groupby('kota')['umur'].mean()
-            
+        
+        kurs_kemarin = ambil_kurs_terakhir()
+        if kurs_kemarin is None:
+            info_kurs_lalu = f"ini laporan pertama dan tidak ada kurs pembanding"
+        else:
+            info_kurs_lalu = f"kurs sebelumnya adalah Rp{kurs_kemarin}"
+        
         with open('laporan.txt', 'a') as f:
             f.write(f"{datetime.now()}\n")
             f.write(f"USD to IDR: [{idr_usd}]\n")
@@ -60,8 +77,10 @@ def main():
                         contents=f"""
                         Kurs USD ke IDR saat ini adalah Rp{idr_usd}.Berikan 1 kalimat insight sederhana tentang kondisi kurs tersebut dan apa artinya bagi orang yang ingin menukar uang.
                         Data rata-rata umur per kota: {umur_kota.to_string()}.
-                        Jawab HANYA dengan JSON, tanpa teks lain, dengan format:
-                        {{ "sentiment" :" salah satu dari (positif/negatif/netral)", "insight":"1 kalimat tentang kondisi kurs, ditambah 1 kalimat fakta menarik dari data rata-rata umur per kota", "saran_aksi":  "1 kalimat saran buat orang yang mau tuker uang"}}
+                        {info_kurs_lalu}
+                        Jawab
+                        HANYA dengan JSON, tanpa teks lain, dengan format:
+                        {{ "sentiment" :" salah satu dari (positif/negatif/netral)", "insight":"1 kalimat tentang kondisi kurs, ditambah 1 kalimat fakta menarik dari data rata-rata umur per kota, dan bandingkan kurs sekarang dan sebelumnya", "saran_aksi":  "1 kalimat saran buat orang yang mau tuker uang"}}
                         """
                     )
                     data = json.loads(response.text)
