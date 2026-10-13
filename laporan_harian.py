@@ -44,6 +44,17 @@ def ambil_kurs_terakhir():
         return
     return kurs[0]
 
+def ambil_rata_rata_kurs():
+    conn = sqlite3.connect("laporan.db")
+    cursor = conn.cursor()
+    cursor.execute("CREATE TABLE IF NOT EXISTS laporan (tanggal TEXT, kurs REAL, sentiment TEXT)")
+    cursor.execute("SELECT(AVG(kurs)) FROM (SELECT kurs FROM laporan ORDER BY rowid DESC LIMIT 3)")
+    kurs = cursor.fetchone()
+    conn.close()
+    if kurs[0] is None:
+        return
+    return round(kurs[0], 2)
+
 def main():
     try:
         #request api
@@ -60,6 +71,13 @@ def main():
         else:
             info_kurs_lalu = f"kurs sebelumnya adalah Rp{kurs_kemarin}"
         
+        rata_rata_kurs = ambil_rata_rata_kurs()
+        
+        if rata_rata_kurs is None:
+            avg_kurs = f"ini laporan pertama dan tidak ada kurs pembanding"
+        else:
+            avg_kurs = f"kurs rata-rata adalah Rp{rata_rata_kurs}"
+            
         with open('laporan.txt', 'a') as f:
             f.write(f"{datetime.now()}\n")
             f.write(f"USD to IDR: [{idr_usd}]\n")
@@ -78,9 +96,10 @@ def main():
                         Kurs USD ke IDR saat ini adalah Rp{idr_usd}.Berikan 1 kalimat insight sederhana tentang kondisi kurs tersebut dan apa artinya bagi orang yang ingin menukar uang.
                         Data rata-rata umur per kota: {umur_kota.to_string()}.
                         {info_kurs_lalu}
+                        {avg_kurs}
                         Jawab
                         HANYA dengan JSON, tanpa teks lain, dengan format:
-                        {{ "sentiment" :" salah satu dari (positif/negatif/netral)", "insight":"1 kalimat tentang kondisi kurs, ditambah 1 kalimat fakta menarik dari data rata-rata umur per kota, dan bandingkan kurs sekarang dan sebelumnya", "saran_aksi":  "1 kalimat saran buat orang yang mau tuker uang"}}
+                        {{ "sentiment" :" salah satu dari (positif/negatif/netral)", "insight":"1 kalimat tentang kondisi kurs, ditambah 1 kalimat fakta menarik dari data rata-rata umur per kota, bandingkan kurs sekarang dan sebelumnya, bandingkan juga kurs sekarang dengan kurs rata rata itu sendiri", "saran_aksi":  "1 kalimat saran buat orang yang mau tuker uang"}}
                         """
                     )
                     data = json.loads(response.text)
