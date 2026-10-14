@@ -26,3 +26,5 @@ Setelah laporan tersimpan, script ngirim satu pesan ke Telegram berisi kurs, sen
 - menyimpan tanggal, kurs, sentiment di database SQLite
 - nama database laporan.db
 - database dibuat otomatis saat script dijalankan, jadi tidak memerlukan laporan.db saya
+- data lama dipakai untuk membandingkan dengan data sekarang
+- rata-rata 3 kurs terakhir digunakan untuk pembanding
