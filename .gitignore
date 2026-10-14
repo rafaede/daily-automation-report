@@ -1,3 +1,4 @@
 .env
 laporan.txt
 laporan.db
+__pycache__/
