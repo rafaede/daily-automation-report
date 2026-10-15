@@ -68,8 +68,15 @@ def main():
         kurs_kemarin = ambil_kurs_terakhir()
         if kurs_kemarin is None:
             info_kurs_lalu = f"ini laporan pertama dan tidak ada kurs pembanding"
+            selisih = None
         else:
             info_kurs_lalu = f"kurs sebelumnya adalah Rp{kurs_kemarin}"
+            selisih = round(idr_usd - kurs_kemarin, 2)
+            
+        if selisih is None:
+            info_selisih = f"ga ada selisih karena belum ada pembanding"
+        else:
+            info_selisih = f"selisih kurs dibanding sebelumnya adalah Rp {selisih}"
         
         rata_rata_kurs = ambil_rata_rata_kurs()
         
@@ -97,9 +104,10 @@ def main():
                         Data rata-rata umur per kota: {umur_kota.to_string()}.
                         {info_kurs_lalu}
                         {avg_kurs}
+                        {info_selisih}
                         Jawab
                         HANYA dengan JSON, tanpa teks lain, dengan format:
-                        {{ "sentiment" :" salah satu dari (positif/negatif/netral)", "insight":"1 kalimat tentang kondisi kurs, ditambah 1 kalimat fakta menarik dari data rata-rata umur per kota, bandingkan kurs sekarang dan sebelumnya, bandingkan juga kurs sekarang dengan kurs rata rata itu sendiri", "saran_aksi":  "1 kalimat saran buat orang yang mau tuker uang"}}
+                        {{ "sentiment" :" salah satu dari (positif/negatif/netral)", "insight":"1 kalimat tentang kondisi kurs, ditambah 1 kalimat fakta menarik dari data rata-rata umur per kota, bandingkan kurs sekarang dan sebelumnya, bandingkan juga kurs sekarang dengan kurs rata rata itu sendiri, sebutkan selisih kurs dibanding sebelumnya", "saran_aksi":  "1 kalimat saran buat orang yang mau tuker uang"}}
                         """
                     )
                     data = json.loads(response.text)
